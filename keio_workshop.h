@@ -12,7 +12,7 @@
 #define PI (3.141592)
 
 //グローバル変数
-char szClassName[]="PathFollower";                   //ｳｨﾝﾄﾞｳのｸﾗｽ名
+char szClassName[] = "PathFollower";                   //ｳｨﾝﾄﾞｳのｸﾗｽ名
 HWND hWnd;                                       //ｳｨﾝﾄﾞｳﾊﾝﾄﾞﾙ
 
 struct VPOINT {
@@ -24,7 +24,7 @@ struct VPOINT {
 	int i;
 	unsigned long t;
 };
-double vang[32]={-30.6667,	-9.3333,
+double vang[32] = { -30.6667,	-9.3333,
 				-29.3333,	-8.0,
 				-28.0,		-6.6666,
 				-26.6667,	-5.3333,
@@ -39,19 +39,19 @@ double vang[32]={-30.6667,	-9.3333,
 				-14.6667,	6.6667,
 				-13.3333,	8.0,
 				-12.0,		9.3333,
-				-10.6667,	10.6667};
-double vang_vlp16[32]={-15,1,-13,3,-11,5,-9,7,-7,9,-5,11,-3,13,-1,15,-15,1,-13,3,-11,5,-9,7,-7,9,-5,11,-3,13,-1,15};
-double vang_vlp32c[32]={-25,-1,-1.667,-15.639,-11.31,0,-0.667,-8.843,-7.254,0.333,-0.333,-6.148,-5.333,1.333,0.667,-4,-4.667,1.667,1,-3.667,-3.333,3.333,2.333,-2.667,-3,7,4.667,-2.333,-2,15,10.333,-1.333};
-double vlp32choffset[32]={1.4,-4.2,1.4,-1.4,1.4,-1.4,4.2,-1.4,1.4,-4.2,1.4,-1.4,4.2,-1.4,4.2,-1.4,1.4,-4.2,1.4,-4.2,4.2,-1.4,1.4,-1.4,1.4,-1.4,1.4,-4.2,4.2,-1.4,1.4,-1.4};
+				-10.6667,	10.6667 };
+double vang_vlp16[32] = { -15,1,-13,3,-11,5,-9,7,-7,9,-5,11,-3,13,-1,15,-15,1,-13,3,-11,5,-9,7,-7,9,-5,11,-3,13,-1,15 };
+double vang_vlp32c[32] = { -25,-1,-1.667,-15.639,-11.31,0,-0.667,-8.843,-7.254,0.333,-0.333,-6.148,-5.333,1.333,0.667,-4,-4.667,1.667,1,-3.667,-3.333,3.333,2.333,-2.667,-3,7,4.667,-2.333,-2,15,10.333,-1.333 };
+double vlp32choffset[32] = { 1.4,-4.2,1.4,-1.4,1.4,-1.4,4.2,-1.4,1.4,-4.2,1.4,-1.4,4.2,-1.4,4.2,-1.4,1.4,-4.2,1.4,-4.2,4.2,-1.4,1.4,-1.4,1.4,-1.4,1.4,-4.2,4.2,-1.4,1.4,-1.4 };
 
 
 
-double coscal[72001],sincal[72001], coscalv[32],sincalv[32];
+double coscal[72001], sincal[72001], coscalv[32], sincalv[32];
 
 
 HANDLE hFMVelo;
-int VeloNG=0;
-static char *lpstr;
+int VeloNG = 0;
+static char* lpstr;
 VPOINT p[40000];
 VPOINT p_32B[40000];
 VPOINT ptmp[40000];
@@ -80,10 +80,10 @@ unsigned char ptmpNG2_32B[40000];
 unsigned char tmpdata[1206000];
 int velovalidflg = 0;
 int velopointnum = 0;
-int velopointnum_L=0;
-int velopointnum_R=0;
-int velopointnum_F=0;
-int velopointnum_B=0;
+int velopointnum_L = 0;
+int velopointnum_R = 0;
+int velopointnum_F = 0;
+int velopointnum_B = 0;
 int velopointnum_32B = 0;
 double coscalv_16[32], sincalv_16[32];
 double coscalv_16hr[32], sincalv_16hr[32];
@@ -122,7 +122,7 @@ double POSOFFSET = 1.2;
 
 void main2();
 unsigned long GetTimer();
-void HSBitmap(HDC , int , int ,int ,int , int ,unsigned char *);
+void HSBitmap(HDC, int, int, int, int, int, unsigned char*);
 void velocheck();
 void velosharememoryinit();
 int velogethdl32();
@@ -134,7 +134,7 @@ int velogetvlp16_multi_F();
 int velogetvlp16_multi_B();
 int velogetvlp32c_F();
 int velogetvlp32c_B();
-void saveBMP(HDC , int , int , LPCTSTR );
+void saveBMP(HDC, int, int, LPCTSTR);
 int velogetOS1();
 
 
@@ -219,7 +219,7 @@ void velocheck() {
 		velopointnum_B = velogetvlp16_multi_B();
 	}
 
-	memcpy(tmpdatachk_OS1, lpstr+1206*300, 4352);
+	memcpy(tmpdatachk_OS1, lpstr + 1206 * 300, 4352);
 	if (oldtimestamp_OS1 != (tmpdatachk_OS1[32] + tmpdatachk_OS1[33] * 256 + tmpdatachk_OS1[34] * 256 * 256) / 1000) {
 		oldtimestamp_OS1 = (tmpdatachk_OS1[32] + tmpdatachk_OS1[33] * 256 + tmpdatachk_OS1[34] * 256 * 256) / 1000;
 		velopointnum_OS1 = velogetOS1();
@@ -243,8 +243,8 @@ void velosharememoryinit() {
 	if (hFMVelo == NULL) { MessageBox(hWnd, "LIDARの共有メモリが存在しません", "エラー", MB_OK); VeloNG = 1; }
 
 
-	
-	for (i = 0; i < 32; i++)vang[i] = vang_vlp32c[i]; 
+
+	for (i = 0; i < 32; i++)vang[i] = vang_vlp32c[i];
 	for (i = 0; i < 72001; i++) { coscal[i] = cos(-(double)i / 100.0 / 180.0 * PI); sincal[i] = sin(-(double)i / 100.0 / 180.0 * PI); }
 	for (i = 0; i < 32; i++) { coscalv[i] = cos(vang[i] / 180.0 * PI); sincalv[i] = sin(vang[i] / 180.0 * PI); }
 
@@ -252,7 +252,7 @@ void velosharememoryinit() {
 	for (i = 0; i < 32; i++) { coscalv_16hr[i] = cos(vang_vlp16[i] / 180.0 * PI * 2.0 / 3.0); sincalv_16hr[i] = sin(vang_vlp16[i] / 180.0 * PI * 2.0 / 3.0); }
 	for (i = 0; i < 64; i++) { coscalvOS1[i] = cos(vangOS1[i] / 180.0 * PI); sincalvOS1[i] = sin(vangOS1[i] / 180.0 * PI); }
 
-	
+
 }
 
 int velogetvlp16_multi_R() {
@@ -735,7 +735,7 @@ int velogetvlp32c_F() {
 			if (chkang > 180)chkang = chkang - 360;
 			if (chkang < -180)chkang = chkang + 360;
 			//chkang < 175 && chkang > -175
-			if (chkang < 175 && chkang > -175&&tmpdata[1206 * i + j * 100] == 0xff && tmpdata[1206 * i + j * 100 + 1] == 0xee)for (k = 0; k < 32; k++) {
+			if (chkang < 175 && chkang > -175 && tmpdata[1206 * i + j * 100] == 0xff && tmpdata[1206 * i + j * 100 + 1] == 0xee)for (k = 0; k < 32; k++) {
 				angle2 = angle + vlp32choffset[k] * 100; if (angle2 < 0)angle2 = 36000 + angle2;
 
 				ptmp[pnum].a = angle2 / 100.0 / 180.0 * PI;
@@ -782,7 +782,7 @@ int velogetvlp32c_F() {
 		if (fabs(ptmp[i - 32].z - ptmp[i + 32].z) < 0.05 && fabs(ptmp[i - 32].z - ptmp[i].z) > 0.2 && ptmp[i].l < 25) NGflg = 1;
 		else if (ptmp[i].l > calrange || ptmp[i].l<2 || ptmpZ[i]>h || fabs(ptmp[i].y) > 25) NGflg = 1;
 		else if (ptmp[i].x<4.0 && ptmp[i].x>-4.0 && ptmp[i].y<1.2 && ptmp[i].y>-1.2)NGflg = 1;
-		
+
 		if (NGflg == 0) {
 			p[tpnum] = ptmp[i];
 			ptmpX2[tpnum] = ptmpX[i];
@@ -829,7 +829,7 @@ int velogetvlp32c_B() {
 	pnum = 0;
 	double hang = VLP32HANGLE_B;
 	vlpvangle = VLP32VANGLE_B;
-	vang_koubai =0;
+	vang_koubai = 0;
 
 
 	c1 = cos(vlpvangle / 100.0 / 180.0 * PI + vang_koubai);
@@ -865,7 +865,7 @@ int velogetvlp32c_B() {
 			if (chkang > 180)chkang = chkang - 360;
 			if (chkang < -180)chkang = chkang + 360;
 
-			if ((chkang > 10 || chkang <  -10) && tmpdata[1206 * i + j * 100] == 0xff && tmpdata[1206 * i + j * 100 + 1] == 0xee)for (k = 0; k < 32; k++) {
+			if ((chkang > 10 || chkang < -10) && tmpdata[1206 * i + j * 100] == 0xff && tmpdata[1206 * i + j * 100 + 1] == 0xee)for (k = 0; k < 32; k++) {
 				angle2 = angle + vlp32choffset[k] * 100; if (angle2 < 0)angle2 = 36000 + angle2;
 
 				ptmp[pnum].a = angle2 / 100.0 / 180.0 * PI;

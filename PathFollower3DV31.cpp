@@ -9,6 +9,9 @@ long timeA = 0, timeB = 0;
 int looptime_draw = 0, looptime_cal = 0;
 double etime = 0.0;
 
+// LiDAR toggle
+int show_lidar = 8;   // 0:none, 1:center, 2:rear32, 3:left, 4:front, 5:right, 6:rear, 7:OS1, 8:ALL
+
 // Vehicle state (from shared memory)
 double Car_X = 0.0;
 double Car_Y = 0.0;
@@ -32,13 +35,16 @@ void main2();
 // ==============================
 // Main
 // ==============================
+// Added SAL annotations to match Windows headers and avoid C28251 warning.
 int WINAPI WinMain(
-    HINSTANCE hInstance,
-    HINSTANCE hPrevInstance,
-    LPSTR lpCmdLine,
-    int nCmdShow
+    _In_ HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPSTR lpCmdLine,
+    _In_ int nCmdShow
 )
 {
+    // local loop variable removed from outer scope to avoid accidental reuse
+    // (we'll use descriptive locals inside loops)
     int i;
 
     // ==========================
@@ -82,6 +88,7 @@ int WINAPI WinMain(
         timeA = GetTimer();
 
         main2();
+        velocheck();
         ClearDrawScreen();
 
         // ==========================
@@ -122,32 +129,95 @@ int WINAPI WinMain(
         // ==========================
         // Floor grid
         // ==========================
-        for (i = -200; i < 200; i++) {
-            DrawLine3D(VGet(i, 0, 200), VGet(i, 0, -200), GetColor(50, 50, 50));
-            DrawLine3D(VGet(200, 0, i), VGet(-200, 0, i), GetColor(50, 50, 50));
+        for (int gx = -200; gx < 200; gx++) {
+            DrawLine3D(VGet(gx, 0, 200), VGet(gx, 0, -200), GetColor(50, 50, 50));
+            DrawLine3D(VGet(200, 0, gx), VGet(-200, 0, gx), GetColor(50, 50, 50));
         }
+
+        // ==========================
+        // LiDAR toggle (L key)
+        // ==========================
+        static int old_l_key = 0;
+        int now_l_key = CheckHitKey(KEY_INPUT_L);
+
+        if (now_l_key != 0 && old_l_key == 0) {
+            show_lidar++;
+            if (show_lidar > 8) show_lidar = 0;
+        }
+        old_l_key = now_l_key;
 
         // ==========================
         // LiDAR visualization
         // ==========================
-        //if (velopointvalidflg == 1 && velopointnum > 0) {
-            double cosv = cos(Car_Yaw);
-            double sinv = sin(Car_Yaw);
+        // Use vehicle yaw and position variables to compute transformed LiDAR points.
+        double cosang = cos(Car_Yaw);
+        double sinang = sin(Car_Yaw);
+
+        // Use the existing toggle variable 'show_lidar' instead of undefined 'showpnt'.
+        if (show_lidar == 1 || show_lidar == 8) {
+            double tmpx, tmpy;
 
             for (int i = 0; i < velopointnum; i++) {
-                double wx = Car_X + p[i].x * cosv - p[i].y * sinv;
-                double wy = Car_Y + p[i].x * sinv + p[i].y * cosv;
-
-                DrawSphere3D(
-                    VGet((float)wx, (float)(p[i].z + 0.1), (float)wy),
-                    0.05f,
-                    6,
-                    GetColor(255, 0, 0),
-                    GetColor(255, 255, 255),
-                    TRUE
-                );
+                tmpx = Car_X + p[i].x * cosang - p[i].y * sinang;
+                tmpy = Car_Y + p[i].x * sinang + p[i].y * cosang;
+                DrawSphere3D(VGet(tmpx, p[i].z + 0.1, tmpy), 0.05, 4, GetColor(200, 0, 0), GetColor(255, 255, 255), TRUE);
             }
-        //}
+        }
+
+        if (show_lidar == 2 || show_lidar == 8) {
+            double tmpx, tmpy;
+            for (int i = 0; i < velopointnum_32B; i++) {
+                tmpx = Car_X + p_32B[i].x * cosang - p_32B[i].y * sinang;
+                tmpy = Car_Y + p_32B[i].x * sinang + p_32B[i].y * cosang;
+                DrawSphere3D(VGet(tmpx, p_32B[i].z + 0.1, tmpy), 0.05, 4, GetColor(0, 200, 200), GetColor(255, 255, 255), TRUE);
+            }
+        }
+
+        if (show_lidar == 3 || show_lidar == 8) {
+            for (int i = 0; i < velopointnum_L; i++) {
+                double tmpx, tmpy;
+                tmpx = Car_X + p_L[i].x * cosang - p_L[i].y * sinang;
+                tmpy = Car_Y + p_L[i].x * sinang + p_L[i].y * cosang;
+                DrawSphere3D(VGet(tmpx, p_L[i].z + 0.1, tmpy), 0.05, 0, GetColor(0, 200, 0), GetColor(255, 255, 255), TRUE);
+            }
+        }
+
+        if (show_lidar == 4 || show_lidar == 8) {
+            for (int i = 0; i < velopointnum_F; i++) {
+                double tmpx, tmpy;
+                tmpx = Car_X + p_F[i].x * cosang - p_F[i].y * sinang;
+                tmpy = Car_Y + p_F[i].x * sinang + p_F[i].y * cosang;
+                DrawSphere3D(VGet(tmpx, p_F[i].z + 0.1, tmpy), 0.05, 0, GetColor(0, 0, 200), GetColor(255, 255, 255), TRUE);
+            }
+        }
+
+        if (show_lidar == 5 || show_lidar == 8) {
+            for (int i = 0; i < velopointnum_R; i++) {
+                double tmpx, tmpy;
+                tmpx = Car_X + p_R[i].x * cosang - p_R[i].y * sinang;
+                tmpy = Car_Y + p_R[i].x * sinang + p_R[i].y * cosang;
+                DrawSphere3D(VGet(tmpx, p_R[i].z + 0.1, tmpy), 0.05, 0, GetColor(200, 200, 0), GetColor(255, 255, 255), TRUE);
+            }
+        }
+
+        if (show_lidar == 6 || show_lidar == 8) {
+            for (int i = 0; i < velopointnum_B; i++) {
+                double tmpx, tmpy;
+                tmpx = Car_X + p_B[i].x * cosang - p_B[i].y * sinang;
+                tmpy = Car_Y + p_B[i].x * sinang + p_B[i].y * cosang;
+                DrawSphere3D(VGet(tmpx, p_B[i].z + 0.1, tmpy), 0.05, 0, GetColor(200, 0, 200), GetColor(255, 255, 255), TRUE);
+            }
+        }
+
+        if (show_lidar == 7 || show_lidar == 8) {
+            for (int i = 0; i < velopointnum_OS1; i++) {
+                double tmpx, tmpy;
+                tmpx = Car_X + p_OS1[i].x * cosang - p_OS1[i].y * sinang;
+                tmpy = Car_Y + p_OS1[i].x * sinang + p_OS1[i].y * cosang;
+                DrawSphere3D(VGet(tmpx, p_OS1[i].z + 0.1, tmpy), 0.05, 0, GetColor(200, 200, 200), GetColor(255, 255, 255), TRUE);
+
+            }
+        }
 
         // ==========================
         // Trajectory
@@ -180,6 +250,24 @@ int WINAPI WinMain(
         // ==========================
         DrawFormatString(10, 10, GetColor(255, 255, 0), "Time=%.2lf Looptime Draw=%d CAL=%d", etime, looptime_draw, looptime_cal);
         DrawFormatString(10, 50, GetColor(255, 255, 0), "Velocity=%.2lf km/h Yaw Rate=%.2lf deg/s", g_vel_kmh, g_yaw_rate); DrawFormatString(10, 90, GetColor(255, 255, 0), "X=%.2lf m Y=%.2lf m Yaw Angle=%.2lf rad", Car_X, Car_Y, Car_Yaw); 
+
+        DrawFormatString(
+            10, 130, GetColor(0, 255, 255),
+            "show_lidar = %d (Press L to toggle)", show_lidar
+        );
+
+        DrawFormatString(
+            10, 170, GetColor(255, 0, 0),
+            "LIDAR num=%d num32B=%d numL=%d numF=%d numR=%d numB=%d numOS1=%d",
+     
+            velopointnum,
+            velopointnum_32B,
+            velopointnum_L,
+            velopointnum_F,
+            velopointnum_R,
+            velopointnum_B,
+            velopointnum_OS1
+        );
 
         ScreenFlip();
     }
