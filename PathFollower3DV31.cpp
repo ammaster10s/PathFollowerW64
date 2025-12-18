@@ -308,3 +308,11 @@ void main2()
     traj_timer += 0.025;
 
     if (traj_timer >= 0.1 && Tra_cnt < 1000) {
+        Tra_X[Tra_cnt] = Car_X;
+        Tra_Y[Tra_cnt] = Car_Y;
+        Tra_cnt++;
+        traj_timer = 0.0;
+    }
+
+    looptime_cal = GetTimer() - timeB;
+}
