@@ -122,9 +122,22 @@ int WINAPI WinMain(
         // ==========================
         // Light
         // ==========================
-        SetLightDirection(
+      
+      /*  SetLightDirection(
             VGet((float)-cos(Car_Yaw), -1.0f, (float)-sin(Car_Yaw))
         );
+        */
+
+        SetLightDirection(
+            VGet(
+                -cos(cam_height + Car_Yaw),
+                -1.0f,
+                -sin(cam_height  + Car_Yaw)
+            )
+        );
+
+
+
 
         // ==========================
         // Floor grid
@@ -249,7 +262,7 @@ int WINAPI WinMain(
         // Debug info
         // ==========================
         DrawFormatString(10, 10, GetColor(255, 255, 0), "Time=%.2lf Looptime Draw=%d CAL=%d", etime, looptime_draw, looptime_cal);
-        DrawFormatString(10, 50, GetColor(255, 255, 0), "Velocity=%.2lf km/h Yaw Rate=%.2lf deg/s", g_vel_kmh, g_yaw_rate); DrawFormatString(10, 90, GetColor(255, 255, 0), "X=%.2lf m Y=%.2lf m Yaw Angle=%.2lf rad", Car_X, Car_Y, Car_Yaw); 
+        DrawFormatString(10, 50, GetColor(255, 255, 0), "Velocity=%.2lf km/h Yaw Rate=%.2lf deg/s", g_vel_kmh, g_yaw_rate); DrawFormatString(10, 90, GetColor(255, 255, 0), "X=%.2lf m Y=%.2lf m Yaw Angle=%.2lf rad", Car_X, Car_Y, Car_Yaw);
 
         DrawFormatString(
             10, 130, GetColor(0, 255, 255),
@@ -259,7 +272,7 @@ int WINAPI WinMain(
         DrawFormatString(
             10, 170, GetColor(255, 0, 0),
             "LIDAR num=%d num32B=%d numL=%d numF=%d numR=%d numB=%d numOS1=%d",
-     
+
             velopointnum,
             velopointnum_32B,
             velopointnum_L,
@@ -295,11 +308,3 @@ void main2()
     traj_timer += 0.025;
 
     if (traj_timer >= 0.1 && Tra_cnt < 1000) {
-        Tra_X[Tra_cnt] = Car_X;
-        Tra_Y[Tra_cnt] = Car_Y;
-        Tra_cnt++;
-        traj_timer = 0.0;
-    }
-
-    looptime_cal = GetTimer() - timeB;
-}
